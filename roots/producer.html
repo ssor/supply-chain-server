@@ -1,0 +1,110 @@
+<!doctype html>
+<html>
+
+<head>
+    <title>生产商</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font: 13px Helvetica, Arial;
+        }
+
+        form {
+            background: #000;
+            padding: 3px;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+        }
+
+        form input {
+            border: 0;
+            padding: 10px;
+            width: 90%;
+            margin-right: .5%;
+        }
+
+        button {
+            width: 9%;
+            background: rgb(130, 224, 255);
+            border: none;
+            padding: 10px;
+            margin-top: 20px;
+        }
+
+        #messages {
+            list-style-type: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        #messages li {
+            padding: 5px 10px;
+        }
+
+        #messages li:nth-child(odd) {
+            background: #eee;
+        }
+    </style>
+</head>
+
+<body>
+    <div style="margin-left: 50px;">
+        <ul id="messages"></ul>
+        <button onclick="stockout()">出库</button>
+    </div>
+    <script src="assets/socket.io-1.2.0.js"></script>
+    <script src="assets/jquery-1.11.1.js"></script>
+    <script>
+        // const url = "ws://example.com:3000/supplychain";
+        const url = "";
+        const myId = "001"
+        var socket = io();
+
+        const actors = {
+            "1": "生产商"
+        };
+
+        socket.on("connect", () => {
+            console.log(`socket id: ${socket.ids}  conected: ${socket.connected}`);
+            socket.emit("login", JSON.stringify({ deviceId: myId }))
+
+        });
+
+        socket.on('error', (error) => {
+            console.log('error when connect to ', url, " : ", error)
+        })
+        //   var s2 = io("/chat");
+
+        // socket.on('reply', function (msg) {
+        //     $('#messages').append($('<li>').text("<- " + msg));
+        // });
+
+        socket.on('dispatch-actor', function (msg) {
+            let info = JSON.parse(msg);
+            if (info.deviceId === myId) {
+                console.log(`device id (${myId}) actor id: ${info.actorId}`);
+                $('#messages').append($('<li>').text(`${Date().toLocaleString()} <- my actor is ${info.actorId} ${actors[info.actorId + ""]}`));
+            } else {
+                console.log(`device id do not match: ${myId} !== ${info.deviceId}`);
+            }
+        });
+        const truckId = "truck-001";
+
+        function stockout() {
+            let info = {
+                deviceId: myId,
+                truckId: truckId,
+                stockCount: 10,
+            }
+            socket.emit("stock-out", JSON.stringify(info));
+        }
+    </script>
+</body>
+
+</html>

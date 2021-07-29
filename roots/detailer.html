@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>零售商</title>
+    <script type="text/javascript">
+        var conn;
+        var msg = document.getElementById("msg");
+        var log = document.getElementById("log");
+        var roleID = 16;
+
+        function appendLog(item) {
+            // var doScroll = log.scrollTop > log.scrollHeight - log.clientHeight - 1;
+            log.appendChild(item);
+            // if (doScroll) {
+            //     log.scrollTop = log.scrollHeight - log.clientHeight;
+            // }
+        }
+        function appendLogText(text) {
+            var item = document.createElement("div");
+            item.innerText = text;
+            appendLog(item);
+        }
+        function sendJoinAsRoleMessage() {
+            let roleInfo = {
+                "type": 1,
+                "roleID": roleID
+            };
+            conn.send(JSON.stringify(roleInfo));
+            console.log("--> ");
+            console.table(roleInfo);
+        }
+
+        window.onload = function () {
+            log = document.getElementById("log");
+            document.getElementById("form").onsubmit = function () {
+                if (!conn) {
+                    return false;
+                }
+                if (!msg.value) {
+                    return false;
+                }
+                conn.send(msg.value);
+                msg.value = "";
+                return false;
+            };
+
+            if (window["WebSocket"]) {
+                conn = new WebSocket("ws://" + document.location.host + "/ws");
+                conn.onclose = function (evt) {
+                    var item = document.createElement("div");
+                    item.innerHTML = "<b>Connection closed.</b>";
+                    appendLog(item);
+                };
+                conn.onmessage = function (evt) {
+                    var messages = evt.data.split('\n');
+                    for (var i = 0; i < messages.length; i++) {
+                        console.log("<--- ");
+                        let obj = JSON.parse(messages[i]);
+                        switch (obj.type) {
+                            case 1:
+
+                                break;
+                            case 2:
+                                var text = `GameID: ${obj.gameID}   Inventory: ${obj.currentInventory} / ${obj.maxInventory}`;
+                                appendLogText(text);
+                                console.table(obj);
+                                break;
+                            case 3:
+                                var text = `purchase event: ${obj.purchaseCnt}`;
+                                appendLogText(text);
+                                break;
+                            default:
+                                console.log('No Such Message Type');
+                                break;
+                        }
+                    }
+                };
+            } else {
+                var item = document.createElement("div");
+                item.innerHTML = "<b>Your browser does not support WebSockets.</b>";
+                appendLog(item);
+            }
+        };
+
+    </script>
+    <style type="text/css">
+        html {
+            overflow: hidden;
+        }
+
+        body {
+            overflow: hidden;
+            padding: 0;
+            margin: 0;
+            width: 100%;
+            height: 100%;
+            background: gray;
+        }
+
+        #log {
+            background: white;
+            margin: 0;
+            padding: 0.5em 0.5em 0.5em 0.5em;
+            position: absolute;
+            top: 0.5em;
+            left: 0.5em;
+            right: 0.5em;
+            min-width: 200px;
+            /* bottom: 3em; */
+            overflow: auto;
+        }
+
+        #control-panel {
+            background: green;
+            margin: 0;
+            padding: 0.5em 0.5em 0.5em 0.5em;
+            position: absolute;
+            height: 5em;
+            left: 0.5em;
+            right: 0.5em;
+            bottom: 3em;
+            overflow: auto;
+        }
+
+        button {
+            margin-top: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="log"></div>
+    <div id="control-panel">
+
+        <button onclick="sendJoinAsRoleMessage()" style="width: 100px;height: 36px;">加入零售商</button>
+        <form id="form" style="margin-top: 10px; margin-bottom: 5px;">
+            <input type="submit" value="Send" style="margin-bottom: 5px;" />
+            <input type="text" id="msg" size="64" autofocus />
+        </form>
+    </div>
+</body>
+
+</html>
