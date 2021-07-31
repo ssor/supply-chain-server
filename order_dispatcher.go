@@ -1,13 +1,26 @@
 package main
 
-import "time"
+import (
+	"time"
+
+	"github.com/sirupsen/logrus"
+)
 
 type Order struct {
-	Count int
+	Count int `json:"purchaseCnt"`
+	MessageBase
 }
 
 func NewOrder() *Order {
 	return &Order{Count: 1}
+}
+
+func (o *Order) WithMessageBase(base MessageBase) Order {
+	c := Order{
+		Count:       o.Count,
+		MessageBase: base,
+	}
+	return c
 }
 
 type Orders []*Order
@@ -19,40 +32,44 @@ func (orders Orders) Head() (*Order, Orders) {
 	return orders[0], orders[1:]
 }
 
-func NewOrderDispatcher(sub chan *Order) *OrderDispatcher {
+type OrderChecker interface {
+	CheckOrder()
+}
+
+func NewOrderDispatcher(oc OrderChecker) *OrderDispatcher {
 	od := &OrderDispatcher{
-		orders: Orders{
-			NewOrder(),
-			NewOrder(),
-			NewOrder(),
-			NewOrder(),
-			NewOrder(),
-			NewOrder(),
-		},
-		subscriber: sub,
+		// orders: Orders{
+		// 	NewOrder(),
+		// 	NewOrder(),
+		// 	NewOrder(),
+		// },
+		// subscriber: sub,
+		// gs:         gameState,
+		checker: oc,
 	}
 	return od
 }
 
 type OrderDispatcher struct {
-	orders     Orders
-	subscriber chan *Order
+	checker OrderChecker
+	// orders     Orders
+	// subscriber func(*Order)
+	// gs         *GameState
 }
 
 func (od *OrderDispatcher) run(ticker *time.Ticker) {
+	logrus.Info("order dispatcher start running...")
 	for {
 		<-ticker.C
-		head, left := od.orders.Head()
-		if head == nil {
+		if od.checker == nil {
 			continue
 		}
-		od.orders = left
-		od.subscriber <- head
+		od.checker.CheckOrder()
 	}
-
 }
 
-func (od *OrderDispatcher) Run() {
+func (od *OrderDispatcher) Run() *OrderDispatcher {
 	ticker := time.NewTicker(3 * time.Second)
 	go od.run(ticker)
+	return od
 }

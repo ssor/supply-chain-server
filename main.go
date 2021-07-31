@@ -5,21 +5,22 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	// "github.com/sirupsen/logrus"
 
 	"github.com/gorilla/websocket"
+	"github.com/ispringteam/eventbus"
 )
-var orderSubscriber = make(chan *Order,1)
-var orderDispatcher = NewOrderDispatcher(orderSubscriber)
-var game = NewGame()
-var msgBase = NewMessageBase(game.Id,game.StartTime.Unix())
+
+var eventBus = eventbus.New()
+var gameState = NewGameState(eventBus)
+var truckMonitor *TruckMonitor = NewTruckMonitor(gameState)
+var orderDispatcher = NewOrderDispatcher(gameState)
+
+// var game = NewGame()
+// var msgBase = NewMessageBase(gameState.Id, gameState.StartTime.Unix())
 var upgrader = websocket.Upgrader{} // use default options
 var hub = newHub()
 
-func startListenOrderDispatch(){
-	// orderDispatcher.Run()
-	order:= <- orderSubscriber
-	hub.OrderIn(order)
-}
 // serveWs handles websocket requests from the peer.
 func serveWs(hub *Hub, w http.ResponseWriter, r *http.Request) {
 	conn, err := upgrader.Upgrade(w, r, nil)
@@ -33,7 +34,10 @@ func serveWs(hub *Hub, w http.ResponseWriter, r *http.Request) {
 	// Allow collection of memory referenced by the caller by doing all work in
 	// new goroutines.
 	go client.writePump()
-	go client.readPump()
+	go client.readPump(func(b []byte) {
+		binaryMessageDispatch(b)
+		// eventBus.Publish(&BinaryMessageDispatchEvent{b})
+	})
 }
 
 func GinMiddleware(allowOrigin string) gin.HandlerFunc {
@@ -54,10 +58,53 @@ func GinMiddleware(allowOrigin string) gin.HandlerFunc {
 	}
 }
 
-
 func main() {
 	go hub.run()
-	go startListenOrderDispatch()
+	// go startListenOrderDispatch()
+	orderDispatcher.Run()
+	eventBus.Subscribe(eventNameBroadcast, func(e eventbus.Event) {
+		be := e.(*BroadcastEvent)
+		hub.BroadcastObj(be.Obj)
+	})
+	// eventBus.Subscribe("BroadcastObj", hub.BroadcastObj)
+	// eventBus.Subscribe(eventNamebinaryMessageDispatch, func(event eventbus.Event) {
+	// 	be := event.(*BinaryMessageDispatchEvent)
+	// 	binaryMessageDispatch(be.Binary)
+	// })
+	// eventBus.Subscribe(eventNameNotifyOrderDispatcherStart, notifyOrderDispatcherStart)
+	// eventBus.Subscribe(eventNameNewOrderFromCustomer, newOrderFromCustomer)
+	eventBus.Subscribe(eventNameLevel1DispatcherJoin, func(event eventbus.Event) {
+		e := event.(*Level1DispatherJoinEvent)
+		gameState.AddLevel2Dispather(e.clientID)
+	})
+	eventBus.Subscribe(eventNameLevel2DispatcherJoin, func(event eventbus.Event) {
+		e := event.(*Level2DispatherJoinEvent)
+		gameState.AddLevel1Dispather(e.clientID)
+	})
+	eventBus.Subscribe(eventNameDetailerJoin, func(event eventbus.Event) {
+		e := event.(*DetailerJoinEvent)
+		gameState.AddDetailer(e.Id)
+	})
+	eventBus.Subscribe(eventNameProducerJoin, func(event eventbus.Event) {
+		e := event.(*ProducerJoinEvent)
+		gameState.AddProducer(e.clientID)
+	})
+
+	eventBus.Subscribe(eventNameUpdateDetailerInventory, func(event eventbus.Event) {
+		e := event.(*UpdateDetailerInventoryEvent)
+		gameState.UpdateDetailerInventory(e.Id, e.Inventory)
+	})
+	eventBus.Subscribe(eventNameResetTruckLoadAndInventory, func(event eventbus.Event) {
+		e := event.(*ResetTruckLoadAndInventoryEvent)
+		gameState.UpdateTruckLoad(e.truckID, e.load)
+		gameState.UpdateInventory(e.clientID, e.inventory)
+	})
+	eventBus.Subscribe(eventNameResetTruckDestination, resetTruckDest)
+	eventBus.Subscribe(eventNameresetGame, func(event eventbus.Event) {
+		gameState.Reset()
+		hub.BroadcastObj(gameState.BasicGameInfoMessage())
+	})
+	truckMonitor.Run()
 
 	router := gin.New()
 
@@ -65,9 +112,39 @@ func main() {
 		w, r := context.Writer, context.Request
 		serveWs(hub, w, r)
 	})
+	router.GET("/game/reset", func(c *gin.Context) {
+		eventBus.Publish(&ResetGameEvent{})
+		c.JSON(http.StatusOK, nil)
+	})
 	router.StaticFS("/public", http.Dir("roots"))
 
 	if err := router.Run(":8000"); err != nil {
 		log.Fatal("failed run app: ", err)
 	}
 }
+
+func resetTruckDest(e eventbus.Event) {
+	event := e.(*ResetTruckDestinationEvent)
+	gameState.UpdateTruckDestRole(event.TruckID, event.RoleID)
+}
+
+// func notifyTruckMoved(t *Truck) {
+// 	eventBus.Publish(&BroadcastEvent{t})
+// }
+
+// func notifyOrderDispatcherStart(e eventbus.Event) {
+// 	logrus.Warn("order start dispatch now")
+// 	var orderSubscriber = make(chan *Order, 1)
+// 	NewOrderDispatcher(orderSubscriber).Run()
+// 	go func() {
+// 		for {
+// 			order := <-orderSubscriber
+// 			eventBus.Publish(&NewOrderFromCustomerEvent{order: order})
+// 		}
+// 	}()
+// }
+
+// func startListenOrderDispatch() {
+// 	order := <-orderSubscriber
+// 	hub.OrderIn(order)
+// }

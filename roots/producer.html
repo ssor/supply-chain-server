@@ -1,110 +1,173 @@
-<!doctype html>
-<html>
+<!DOCTYPE html>
+<html lang="en">
 
 <head>
     <title>生产商</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+    <script type="text/javascript">
+        var conn;
+        var msg = document.getElementById("msg");
+        var log = document.getElementById("log");
+        var roleID = 1;
+
+        function appendLog(item) {
+            log.appendChild(item);
+        }
+        function appendLogText(text) {
+            var item = document.createElement("div");
+            item.innerText = text;
+            appendLog(item);
+        }
+        function sendJoinAsRoleMessage() {
+            let roleInfo = {
+                "type": 1,
+                "roleID": roleID
+            };
+            conn.send(JSON.stringify(roleInfo));
+            console.log("--> ");
+            console.table(roleInfo);
+        }
+        function sendTruckDestinationMessage() {
+            let roleInfo = {
+                "type": 4,
+                "roleID": roleID,
+                "truckID": 22
+            };
+            conn.send(JSON.stringify(roleInfo));
+            console.log("--> ");
+            console.table(roleInfo);
+        }
+
+        function sendAddInventoryMessage() {
+            let roleInfo = {
+                "type": 6,
+                "roleID": roleID,
+                "currentInventory": 0,
+                "truckID": 22,
+                "tQuantity": 10
+            };
+            conn.send(JSON.stringify(roleInfo));
+            console.log("--> ");
+            console.table(roleInfo);
+        }
+
+        window.onload = function () {
+            log = document.getElementById("log");
+            document.getElementById("form").onsubmit = function () {
+                if (!conn) {
+                    return false;
+                }
+                if (!msg.value) {
+                    return false;
+                }
+                conn.send(msg.value);
+                msg.value = "";
+                return false;
+            };
+
+            if (window["WebSocket"]) {
+                conn = new WebSocket("ws://" + document.location.host + "/ws");
+                conn.onclose = function (evt) {
+                    var item = document.createElement("div");
+                    item.innerHTML = "<b>Connection closed.</b>";
+                    appendLog(item);
+                };
+                conn.onmessage = function (evt) {
+                    var messages = evt.data.split('\n');
+                    for (var i = 0; i < messages.length; i++) {
+                        console.log("<--- ");
+                        let obj = JSON.parse(messages[i]);
+                        console.table(obj);
+                        switch (obj.type) {
+                            case 1:
+                                break;
+                            case 2:
+                                if (roleID == obj.roleID) {
+                                    var text = `GameID: ${obj.gameID} `;
+                                    appendLogText(text);
+                                }
+                                break;
+                            case 5:
+                                if (roleID == obj.roleID) {
+                                    var text = `truck ${obj.truckID} is coming, distance now is ${obj.remainingDistance}`
+                                    appendLogText(text);
+                                }
+                                break;
+                            case 8:
+                                var text = `game reset to ${obj.gameID}`
+                                appendLogText(text);
+                                break;
+
+                            default:
+                                console.log(`No Such Message Type ${obj.type}`);
+                                break;
+                        }
+                    }
+                };
+            } else {
+                var item = document.createElement("div");
+                item.innerHTML = "<b>Your browser does not support WebSockets.</b>";
+                appendLog(item);
+            }
+        };
+
+    </script>
+    <style type="text/css">
+        html {
+            overflow: hidden;
         }
 
         body {
-            font: 13px Helvetica, Arial;
-        }
-
-        form {
-            background: #000;
-            padding: 3px;
-            position: fixed;
-            bottom: 0;
+            overflow: hidden;
+            padding: 0;
+            margin: 0;
             width: 100%;
+            height: 100%;
+            background: gray;
         }
 
-        form input {
-            border: 0;
-            padding: 10px;
-            width: 90%;
-            margin-right: .5%;
+        #log {
+            background: white;
+            margin: 0;
+            padding: 0.5em 0.5em 0.5em 0.5em;
+            position: absolute;
+            top: 0.5em;
+            left: 0.5em;
+            right: 0.5em;
+            min-width: 200px;
+            /* bottom: 3em; */
+            overflow: auto;
+        }
+
+        #control-panel {
+            background: green;
+            margin: 0;
+            padding: 0.5em 0.5em 0.5em 0.5em;
+            position: absolute;
+            height: 5em;
+            left: 0.5em;
+            right: 0.5em;
+            bottom: 3em;
+            overflow: auto;
         }
 
         button {
-            width: 9%;
-            background: rgb(130, 224, 255);
-            border: none;
-            padding: 10px;
-            margin-top: 20px;
-        }
-
-        #messages {
-            list-style-type: none;
-            margin: 0;
-            padding: 0;
-        }
-
-        #messages li {
-            padding: 5px 10px;
-        }
-
-        #messages li:nth-child(odd) {
-            background: #eee;
+            margin-top: 10px;
         }
     </style>
 </head>
 
 <body>
-    <div style="margin-left: 50px;">
-        <ul id="messages"></ul>
-        <button onclick="stockout()">出库</button>
+    <div id="log"></div>
+    <div id="control-panel">
+
+        <button onclick="sendJoinAsRoleMessage()" style="width: 100px;height: 36px;">加入生产商</button>
+        <button onclick="sendTruckDestinationMessage()" style="width: 150px;height: 36px;">召唤卡车到出库区</button>
+        <button onclick="sendAddInventoryMessage()" style="width: 100px;height: 36px;">卡车离开</button>
+        <form id="form" style="margin-top: 10px; margin-bottom: 5px;">
+            <input type="submit" value="Send" style="margin-bottom: 5px;" />
+            <input type="text" id="msg" size="64" autofocus />
+        </form>
     </div>
-    <script src="assets/socket.io-1.2.0.js"></script>
-    <script src="assets/jquery-1.11.1.js"></script>
-    <script>
-        // const url = "ws://example.com:3000/supplychain";
-        const url = "";
-        const myId = "001"
-        var socket = io();
-
-        const actors = {
-            "1": "生产商"
-        };
-
-        socket.on("connect", () => {
-            console.log(`socket id: ${socket.ids}  conected: ${socket.connected}`);
-            socket.emit("login", JSON.stringify({ deviceId: myId }))
-
-        });
-
-        socket.on('error', (error) => {
-            console.log('error when connect to ', url, " : ", error)
-        })
-        //   var s2 = io("/chat");
-
-        // socket.on('reply', function (msg) {
-        //     $('#messages').append($('<li>').text("<- " + msg));
-        // });
-
-        socket.on('dispatch-actor', function (msg) {
-            let info = JSON.parse(msg);
-            if (info.deviceId === myId) {
-                console.log(`device id (${myId}) actor id: ${info.actorId}`);
-                $('#messages').append($('<li>').text(`${Date().toLocaleString()} <- my actor is ${info.actorId} ${actors[info.actorId + ""]}`));
-            } else {
-                console.log(`device id do not match: ${myId} !== ${info.deviceId}`);
-            }
-        });
-        const truckId = "truck-001";
-
-        function stockout() {
-            let info = {
-                deviceId: myId,
-                truckId: truckId,
-                stockCount: 10,
-            }
-            socket.emit("stock-out", JSON.stringify(info));
-        }
-    </script>
 </body>
 
 </html>

@@ -3,6 +3,7 @@ package main
 import (
 	// "github.com/gorilla/websocket"
 	// "appliedgo.net/what"
+
 	"encoding/json"
 
 	"github.com/davecgh/go-spew/spew"
@@ -35,26 +36,24 @@ func newHub() *Hub {
 	}
 }
 
-func (h *Hub) OrderIn(order *Order) {
-	msg := NewOrderDispatch2DetailerMessage(1, order.Count, msgBase)
-	bs, err := json.Marshal(msg)
-	if err != nil {
-		logrus.Errorf("serialize message error: %s", err)
-		spew.Dump(msg)
-		return
-	}
-	h.Broadcast(bs)
-	logrus.Infof("--> %s", string(bs))
-}
-
 func (h *Hub) Register(client *Client) {
 	client.SetId(h.clientIdRecord)
 	h.clientIdRecord++
 	h.register <- client
 }
 
+func (h *Hub) BroadcastObj(obj interface{}) {
+	bs, err := json.Marshal(obj)
+	if err != nil {
+		logrus.Warn("marshal obj failed, no broadcasting")
+		spew.Dump(obj)
+		return
+	}
+	h.Broadcast(bs)
+}
 func (h *Hub) Broadcast(bs []byte) {
 	h.broadcast <- bs
+	logrus.Infof("--> %s", string(bs))
 }
 
 func (h *Hub) UnRegister(client *Client) {

@@ -3,63 +3,66 @@ package main
 type ActorId int
 
 const (
-	NoSuchActor       ActorId = 0
-	Producer          ActorId = 1
-	LevelOneDispather ActorId = 2
-	LevelTwoDispather ActorId = 3
-	Detailer          ActorId = 4
+	NoSuchActor            ActorId = 0
+	ProducerActor          ActorId = 1
+	LevelOneDispatherActor ActorId = 2
+	LevelTwoDispatherActor ActorId = 3
+	DetailerActor          ActorId = 4
 )
 
 func (id ActorId) String() string {
 	switch id {
 	case NoSuchActor:
 		return "NoSuchActor"
-	case Producer:
+	case ProducerActor:
 		return "Producer"
-	case LevelOneDispather:
+	case LevelOneDispatherActor:
 		return "LevelOneDispather"
-	case LevelTwoDispather:
+	case LevelTwoDispatherActor:
 		return "LevelTwoDispather"
-	case Detailer:
+	case DetailerActor:
 		return "Detailer"
 	}
 	return "error Actor"
 }
 
 var (
-	Producers = []int{
+	NumbersForProducer = []int{
 		1, 2, 3, 4, 5,
 	}
-	LevelOneDispathers = []int{
+	NumberForLevelOneDispathers = []int{
 		6, 7, 8, 9, 10,
 	}
-	LevelTwoDispathers = []int{
+	NumbersForLevelTwoDispather = []int{
 		11, 12, 13, 14, 15,
 	}
-	Detailers = []int{
+	NumbersForDetailer = []int{
 		16, 17, 18, 19, 20,
+	}
+	NumbersForTruck = []int{
+		21, 22, 23, 24, 25,
 	}
 )
 
 func RoleIdToActor(id int) ActorId {
-	for _, v := range Producers {
+	for _, v := range NumbersForProducer {
 		if v == id {
-			return Producer
+			return ProducerActor
 		}
 	}
-	for _, v := range LevelOneDispathers {
+	for _, v := range NumberForLevelOneDispathers {
 		if v == id {
-			return LevelOneDispather
+			return LevelOneDispatherActor
 		}
 	}
-	for _, v := range LevelTwoDispathers {
+	for _, v := range NumbersForLevelTwoDispather {
 		if v == id {
-			return LevelTwoDispather
+			return LevelTwoDispatherActor
 		}
 	}
-	for _, v := range Detailers {
+	for _, v := range NumbersForDetailer {
 		if v == id {
-			return Detailer
+			return DetailerActor
 		}
 	}
 	return NoSuchActor

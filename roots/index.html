@@ -7,6 +7,19 @@
         function openTab(url) {
             window.open(url, '_blank');
         }
+        function resetGame() {
+            let response = fetch("/game/reset")
+                .then(function (response) {
+                    if (response.ok) {
+                        console.log("game reset OK")
+                    } else {
+                        console.log(`game reset quest error: , ${response.status} ${response.statusText}`)
+                    }
+                })
+                .catch(function (error) {
+                    console.log("Error: " + error);
+                })
+        }
     </script>
     <style type="text/css">
         html {
@@ -27,13 +40,15 @@
 <body>
     <div style="margin-left: 100px;margin-top: 100px;">
 
-        <button onclick="openTab('producer.html')" style="width: 100px;height: 36px;">生产商</button>
+        <button onclick="openTab('producer.html')" style="width: 100px;height: 36px;" >生产商</button>
         <br>
-        <button onclick="producer.html" style="width: 100px;height: 36px; margin-top: 20px;">分销商</button>
+        <button onclick="openTab('dispatcher1.html')" style="width: 100px;height: 36px; margin-top: 20px;" >分销商</button>
         <br>
-        <button onclick="producer.html" style="width: 100px;height: 36px; margin-top: 20px;">批发商</button>
+        <button onclick="openTab('dispatcher2.html')" style="width: 100px;height: 36px; margin-top: 20px;" >批发商</button>
         <br>
         <button onclick="openTab('detailer.html')" style="width: 100px;height: 36px; margin-top: 20px;">零售商</button>
+        <br>
+        <button onclick="resetGame()" style="width: 100px;height: 36px; margin-top: 20px;">重置实训</button>
     </div>
 
 </body>

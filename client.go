@@ -4,8 +4,6 @@ import (
 	"bytes"
 	"time"
 
-	"github.com/Jeffail/gabs"
-	"github.com/davecgh/go-spew/spew"
 	"github.com/gorilla/websocket"
 	"github.com/sirupsen/logrus"
 )
@@ -37,9 +35,7 @@ type Client struct {
 	conn *websocket.Conn
 
 	// Buffered channel of outbound messages.
-	send     chan []byte
-	IdNumber int
-	actor    ActorId
+	send chan []byte
 }
 
 func (c *Client) SetId(id int) {
@@ -51,7 +47,7 @@ func (c *Client) SetId(id int) {
 // The application runs readPump in a per-connection goroutine. The application
 // ensures that there is at most one reader on a connection by executing all
 // reads from this goroutine.
-func (c *Client) readPump() {
+func (c *Client) readPump(hook func([]byte)) {
 	defer func() {
 		c.hub.UnRegister(c)
 		// c.hub.unregister <- c
@@ -70,49 +66,11 @@ func (c *Client) readPump() {
 		}
 		message = bytes.TrimSpace(bytes.Replace(message, newline, space, -1))
 		logrus.Infof("client (%d) <- %s", c.id, string(message))
-		jsonParsed, err := gabs.ParseJSON(message)
-		if err != nil {
-			logrus.Warnf("message parse error: %s", err)
-			continue
+		if hook != nil {
+			hook(message)
 		}
-		messageType, ok := jsonParsed.Path("type").Data().(float64)
-		if !ok {
-			spew.Dump(messageType)
-			spew.Dump(ok)
-			logrus.Warnf("message protocol error")
-			continue
-		}
-		t := MessageType(messageType)
-		switch t {
-		case RoleJoinMessageType:
-			number, ok := jsonParsed.Path("roleID").Data().(float64)
-			if !ok {
-				logrus.Warnf("message protocol error")
-				spew.Dump(number)
-				continue
-			}
-			c.IdNumber = int(number)
-			c.actor = RoleIdToActor(c.IdNumber)
-			jsonParsed.Set(200, "maxInventory")
-			jsonParsed.Set(100, "currentInventory")
+		// eventBus.Publish("binaryMessageDispatch", message)
 
-			switch c.actor {
-			case NoSuchActor:
-				logrus.Warnf("no such actor occured from number: %d", number)
-			case Producer:
-				
-			case LevelOneDispather:
-			case LevelTwoDispather:
-			case Detailer:
-				logrus.Infof("client(%d) is a %s", c.IdNumber, c.actor.String())
-			}
-		default:
-			logrus.Warnf("unsupported message type: %d", messageType)
-		}
-		jsonParsed.Set(RoleJoinResponseMessageType, "type")
-		jsonParsed.Set(game.Id, "gameID")
-		jsonParsed.Set(game.StartTime.Unix(), "gameStartTime")
-		c.hub.Broadcast([]byte(jsonParsed.String()))
 	}
 }
 

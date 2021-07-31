@@ -2,19 +2,15 @@
 <html lang="en">
 
 <head>
-    <title>零售商</title>
+    <title>批发商</title>
     <script type="text/javascript">
         var conn;
         var msg = document.getElementById("msg");
         var log = document.getElementById("log");
-        var roleID = 16;
+        var roleID = 6;
 
         function appendLog(item) {
-            // var doScroll = log.scrollTop > log.scrollHeight - log.clientHeight - 1;
             log.appendChild(item);
-            // if (doScroll) {
-            //     log.scrollTop = log.scrollHeight - log.clientHeight;
-            // }
         }
         function appendLogText(text) {
             var item = document.createElement("div");
@@ -34,29 +30,20 @@
             let roleInfo = {
                 "type": 4,
                 "roleID": roleID,
-                "truckID": 21
+                "truckID": 23
             };
             conn.send(JSON.stringify(roleInfo));
             console.log("--> ");
             console.table(roleInfo);
         }
-        function sendDecreaseInventoryMessage() {
-            let roleInfo = {
-                "type": 7,
-                "roleID": roleID,
-                "currentInventory": 100
-            };
-            conn.send(JSON.stringify(roleInfo));
-            console.log("--> ");
-            console.table(roleInfo);
-        }
+
         function sendAddInventoryMessage() {
             let roleInfo = {
                 "type": 6,
                 "roleID": roleID,
-                "currentInventory": 110,
-                "truckID": 21,
-                "tQuantity": 0
+                "currentInventory": 0,
+                "truckID": 23,
+                "tQuantity": 10
             };
             conn.send(JSON.stringify(roleInfo));
             console.log("--> ");
@@ -92,17 +79,10 @@
                         console.table(obj);
                         switch (obj.type) {
                             case 1:
-
                                 break;
                             case 2:
                                 if (roleID == obj.roleID) {
-                                    var text = `GameID: ${obj.gameID}   Inventory: ${obj.currentInventory} / ${obj.maxInventory}`;
-                                    appendLogText(text);
-                                }
-                                break;
-                            case 3:
-                                if (roleID == obj.roleID) {
-                                    var text = `purchase event: ${obj.purchaseCnt}`;
+                                    var text = `GameID: ${obj.gameID} `;
                                     appendLogText(text);
                                 }
                                 break;
@@ -180,10 +160,10 @@
     <div id="log"></div>
     <div id="control-panel">
 
-        <button onclick="sendJoinAsRoleMessage()" style="width: 100px;height: 36px;">加入零售商</button>
+        <button onclick="sendJoinAsRoleMessage()" style="width: 100px;height: 36px;">加入批发商</button>
         <button onclick="sendTruckDestinationMessage()" style="width: 150px;height: 36px;">召唤卡车到入库区</button>
+        <button onclick="sendTruckDestinationMessage()" style="width: 150px;height: 36px;">召唤卡车到出库库区</button>
         <button onclick="sendAddInventoryMessage()" style="width: 100px;height: 36px;">卡车离开</button>
-        <button onclick="sendDecreaseInventoryMessage()" style="width: 100px;height: 36px;">更新购物库存</button>
         <form id="form" style="margin-top: 10px; margin-bottom: 5px;">
             <input type="submit" value="Send" style="margin-bottom: 5px;" />
             <input type="text" id="msg" size="64" autofocus />
