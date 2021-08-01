@@ -3,20 +3,178 @@
 
 <head>
     <title>批发商</title>
-    <script type="text/javascript">
-        var conn;
-        var msg = document.getElementById("msg");
-        var log = document.getElementById("log");
-        var roleID = 6;
+    <link rel="stylesheet" href="/public/assets/bulma.min.css">
+    <script src="/public/assets/easytimer.js"></script>
+    <script src="/public/assets/vue.js"></script>
 
-        function appendLog(item) {
-            log.appendChild(item);
+    <style type="text/css">
+        .field-label {
+            text-align: left;
         }
-        function appendLogText(text) {
-            var item = document.createElement("div");
-            item.innerText = text;
-            appendLog(item);
+    </style>
+</head>
+
+<body>
+
+    <div id="app">
+        <div class="columns" style="margin-top: 30px; margin-left: 10px;">
+            <div class="column is-one-third">
+
+                <h3 class="title is-5">节点信息</h3>
+                <div class="box">
+
+                    <div class="field is-horizontal">
+                        <div class="field-label is-small">
+                            <label class="label">GameID</label>
+                        </div>
+                        <div class="field-label is-normal">
+                            <label class="label">{{ gameID }}</label>
+                        </div>
+                    </div>
+                    <div class="field is-horizontal">
+                        <div class="field-label is-small">
+                            <label class="label">开始时间</label>
+                        </div>
+                        <div class="field-label is-normal">
+                            <label class="label">{{ startTime }}</label>
+                        </div>
+                    </div>
+
+                    <div class="field is-horizontal">
+                        <div class="field-label is-small">
+                            <label class="label">角色</label>
+                        </div>
+                        <div class="field-label is-normal">
+                            <label class="label">批发商</label>
+                        </div>
+                    </div>
+
+                    <div class="field is-horizontal">
+                        <div class="field-label is-small">
+                            <label class="label">库存</label>
+                        </div>
+                        <div class="field-label is-normal">
+                            <label class="label">{{currentInventory}}</label>
+                        </div>
+                    </div>
+                    <div class="field is-horizontal">
+                        <div class="field-label is-small">
+                            <label class="label">最大库存</label>
+                        </div>
+                        <div class="field-label is-normal">
+                            <label class="label">{{maxInventory}}</label>
+                        </div>
+                    </div>
+                    <div class="block"></div>
+                    <button onclick="sendJoinAsRoleMessage()" class="button is-primary is-small">加入批发商</button>
+
+                </div>
+
+                <h3 class="title is-5">卡车信息</h3>
+                <div class="box">
+
+                    <div class="field is-horizontal">
+                        <div class="field-label is-small">
+                            <label class="label">编号</label>
+                        </div>
+                        <div class="field-label is-normal">
+                            <label class="label">{{ truckInfo.truckID }}</label>
+                        </div>
+                    </div>
+
+                    <div class="field is-horizontal">
+                        <div class="field-label is-small">
+                            <label class="label">最大装载量</label>
+                        </div>
+                        <div class="field-label is-normal">
+                            <label class="label">{{truckInfo.tMaxQuantity}} 件</label>
+                        </div>
+                    </div>
+
+                    <div class="field is-horizontal">
+                        <div class="field-label is-small">
+                            <label class="label">已装载量</label>
+                        </div>
+                        <div class="field-label is-normal">
+                            <label class="label">{{truckInfo.tQuantity}} 件</label>
+                        </div>
+                    </div>
+
+                    <div class="field is-horizontal">
+                        <div class="field-label is-small">
+                            <label class="label">距离</label>
+                        </div>
+                        <div class="field-label is-normal">
+                            <label class="label">{{truckInfo.distance}} KM</label>
+                        </div>
+                    </div>
+
+                    <div class="block"></div>
+                    <div class="buttons">
+
+                        <button onclick="sendTruckDestinationMessage()"
+                            class="button is-primary is-small">召唤卡车到入库区</button>
+                        <button onclick="transferProductsFromTruck()" class="button is-primary is-small">卸货入库</button>
+                    </div>
+                    <div class="buttons">
+                        <button onclick="sendTruckDestinationMessage()"
+                            class="button is-primary is-small">召唤卡车到出库区</button>
+                        <button onclick="transferProductsToTruck()" class="button is-primary is-small">出库装车</button>
+                        <button onclick="sendAddInventoryMessage()" class="button is-primary is-small">卡车离开</button>
+                    </div>
+
+                </div>
+
+                <div class="message">
+                    <div class="message-body">
+                        <span style="font-size: small;">{{status}}</span>
+                    </div>
+                </div>
+
+            </div>
+            <div class="column"></div>
+            <div class="column"></div>
+        </div>
+
+    </div>
+
+    <script type="text/javascript">
+        const App = {
+            data() {
+                return {
+                    gameID: "NA",
+                    startTime: 0,
+                    status: "",
+                    truckInfo: {
+                        truckID: 23,
+                        distance: 0,
+                        tMaxQuantity: 0,
+                        tQuantity: 0
+                    },
+                    currentInventory: 0,
+                    maxInventory: 0
+                }
+            }
         }
+        const vm = Vue.createApp(App).mount("#app");
+        // const timer = new Timer();
+
+        var conn;
+        var roleID = 11;
+
+        function transferProductsFromTruck() {
+            vm.currentInventory += vm.truckInfo.tQuantity;
+            vm.truckInfo.tQuantity = 0;
+        }
+
+        function transferProductsToTruck() {
+            vm.truckInfo.tQuantity += 10;
+            if (vm.truckInfo.tMaxQuantity < vm.truckInfo.tQuantity) {
+                vm.truckInfo.tQuantity = vm.truckInfo.tMaxQuantity;
+            }
+            vm.currentInventory -= vm.truckInfo.tQuantity;
+        }
+
         function sendJoinAsRoleMessage() {
             let roleInfo = {
                 "type": 1,
@@ -30,7 +188,7 @@
             let roleInfo = {
                 "type": 4,
                 "roleID": roleID,
-                "truckID": 23
+                "truckID": vm.truckInfo.truckID
             };
             conn.send(JSON.stringify(roleInfo));
             console.log("--> ");
@@ -41,9 +199,9 @@
             let roleInfo = {
                 "type": 6,
                 "roleID": roleID,
-                "currentInventory": 0,
-                "truckID": 23,
-                "tQuantity": 10
+                "currentInventory": vm.currentInventory,
+                "truckID": vm.truckInfo.truckID,
+                "tQuantity": vm.truckInfo.tQuantity
             };
             conn.send(JSON.stringify(roleInfo));
             console.log("--> ");
@@ -51,30 +209,19 @@
         }
 
         window.onload = function () {
-            log = document.getElementById("log");
-            document.getElementById("form").onsubmit = function () {
-                if (!conn) {
-                    return false;
-                }
-                if (!msg.value) {
-                    return false;
-                }
-                conn.send(msg.value);
-                msg.value = "";
-                return false;
-            };
 
             if (window["WebSocket"]) {
                 conn = new WebSocket("ws://" + document.location.host + "/ws");
                 conn.onclose = function (evt) {
-                    var item = document.createElement("div");
-                    item.innerHTML = "<b>Connection closed.</b>";
-                    appendLog(item);
+                    vm.status = "连接已断开";
+                };
+                conn.onopen = function (evt) {
+                    vm.status = "已连接到服务器";
                 };
                 conn.onmessage = function (evt) {
                     var messages = evt.data.split('\n');
                     for (var i = 0; i < messages.length; i++) {
-                        console.log("<--- ");
+                        console.log("<<<<<<--------- ");
                         let obj = JSON.parse(messages[i]);
                         console.table(obj);
                         switch (obj.type) {
@@ -82,19 +229,22 @@
                                 break;
                             case 2:
                                 if (roleID == obj.roleID) {
-                                    var text = `GameID: ${obj.gameID} `;
-                                    appendLogText(text);
+                                    vm.gameID = obj.gameID;
+                                    vm.startTime = obj.gameStartTime;
+                                    vm.maxInventory = obj.maxInventory;
+                                    vm.currentInventory = obj.currentInventory;
                                 }
                                 break;
                             case 5:
                                 if (roleID == obj.roleID) {
-                                    var text = `truck ${obj.truckID} is coming, distance now is ${obj.remainingDistance}`
-                                    appendLogText(text);
+                                    vm.truckInfo.truckID = obj.truckID;
+                                    vm.truckInfo.distance = obj.remainingDistance;
+                                    vm.truckInfo.tMaxQuantity = obj.tMaxQuantity;
+                                    vm.truckInfo.tQuantity = obj.tQuantity;
                                 }
                                 break;
                             case 8:
-                                var text = `game reset to ${obj.gameID}`
-                                appendLogText(text);
+                                vm.gameID = obj.gameID
                                 break;
 
                             default:
@@ -104,71 +254,11 @@
                     }
                 };
             } else {
-                var item = document.createElement("div");
-                item.innerHTML = "<b>Your browser does not support WebSockets.</b>";
-                appendLog(item);
+                console.error("Your browser does not support WebSockets.");
             }
         };
 
     </script>
-    <style type="text/css">
-        html {
-            overflow: hidden;
-        }
-
-        body {
-            overflow: hidden;
-            padding: 0;
-            margin: 0;
-            width: 100%;
-            height: 100%;
-            background: gray;
-        }
-
-        #log {
-            background: white;
-            margin: 0;
-            padding: 0.5em 0.5em 0.5em 0.5em;
-            position: absolute;
-            top: 0.5em;
-            left: 0.5em;
-            right: 0.5em;
-            min-width: 200px;
-            /* bottom: 3em; */
-            overflow: auto;
-        }
-
-        #control-panel {
-            background: green;
-            margin: 0;
-            padding: 0.5em 0.5em 0.5em 0.5em;
-            position: absolute;
-            height: 5em;
-            left: 0.5em;
-            right: 0.5em;
-            bottom: 3em;
-            overflow: auto;
-        }
-
-        button {
-            margin-top: 10px;
-        }
-    </style>
-</head>
-
-<body>
-    <div id="log"></div>
-    <div id="control-panel">
-
-        <button onclick="sendJoinAsRoleMessage()" style="width: 100px;height: 36px;">加入批发商</button>
-        <button onclick="sendTruckDestinationMessage()" style="width: 150px;height: 36px;">召唤卡车到入库区</button>
-        <button onclick="sendTruckDestinationMessage()" style="width: 150px;height: 36px;">召唤卡车到出库库区</button>
-        <button onclick="sendAddInventoryMessage()" style="width: 100px;height: 36px;">卡车离开</button>
-        <form id="form" style="margin-top: 10px; margin-bottom: 5px;">
-            <input type="submit" value="Send" style="margin-bottom: 5px;" />
-            <input type="text" id="msg" size="64" autofocus />
-        </form>
-    </div>
 </body>
 
 </html>

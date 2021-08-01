@@ -3,6 +3,7 @@
 
 <head>
     <title>供应链模拟</title>
+    <link rel="stylesheet" href="/public/assets/bulma.min.css">
     <script type="text/javascript">
         function openTab(url) {
             window.open(url, '_blank');
@@ -22,33 +23,85 @@
         }
     </script>
     <style type="text/css">
-        html {
-            overflow: hidden;
+        .card{
+            cursor: pointer;
         }
-
-        body {
-            overflow: hidden;
-            padding: 0;
-            margin: 0;
-            width: 100%;
-            height: 100%;
-            background: gray;
+        .content{
+            font-weight: bold;
         }
     </style>
 </head>
 
 <body>
-    <div style="margin-left: 100px;margin-top: 100px;">
+    <div style="text-align: center; margin-top: 100px;">
+        <h1 class="title is-1">供应链模拟实训系统</h1>
+    </div>
+    <div class="columns" style="margin-top: 30px; margin-left: 10px;">
+        <div class="column "></div>
+        <div class="column is-2" style="text-align: center;">
+            <div class="card"  onclick="openTab('producer.html')" >
+                <div class="card-image">
+                    <figure class="image is-4by3">
+                        <img src="https://bulma.io/images/placeholders/1280x960.png" alt="Placeholder image">
+                    </figure>
+                </div>
+                <div class="card-content">
+                    <div class="content">
+                        生产商
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="column is-2" style="text-align: center;">
+            <div class="card" onclick="openTab('dispatcher1.html')" >
+                <div class="card-image">
+                    <figure class="image is-4by3">
+                        <img src="https://bulma.io/images/placeholders/1280x960.png" alt="Placeholder image">
+                    </figure>
+                </div>
+                <div class="card-content">
+                    <div class="content">
+                        分销商
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="column is-2" style="text-align: center;">
+            <div class="card" onclick="openTab('dispatcher2.html')" >
+                <div class="card-image">
+                    <figure class="image is-4by3">
+                        <img src="https://bulma.io/images/placeholders/1280x960.png" alt="Placeholder image">
+                    </figure>
+                </div>
+                <div class="card-content">
+                    <div class="content">
+                        批发商
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="column is-2" style="text-align: center;">
+            <div class="card" onclick="openTab('detailer.html')" >
+                <div class="card-image">
+                    <figure class="image is-4by3">
+                        <img src="https://bulma.io/images/placeholders/1280x960.png" alt="Placeholder image">
+                    </figure>
+                </div>
+                <div class="card-content">
+                    <div class="content">
+                        零售商
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="column "></div>
+        
+    </div>
 
-        <button onclick="openTab('producer.html')" style="width: 100px;height: 36px;" >生产商</button>
-        <br>
-        <button onclick="openTab('dispatcher1.html')" style="width: 100px;height: 36px; margin-top: 20px;" >分销商</button>
-        <br>
-        <button onclick="openTab('dispatcher2.html')" style="width: 100px;height: 36px; margin-top: 20px;" >批发商</button>
-        <br>
-        <button onclick="openTab('detailer.html')" style="width: 100px;height: 36px; margin-top: 20px;">零售商</button>
-        <br>
-        <button onclick="resetGame()" style="width: 100px;height: 36px; margin-top: 20px;">重置实训</button>
+
+    <div style="margin-top: 100px; text-align: center;">
+
+        <button onclick="resetGame()" class="button is-danger">重置实训</button>
     </div>
 
 </body>

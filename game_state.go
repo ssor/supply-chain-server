@@ -58,6 +58,8 @@ func (gs *GameState) init() {
 		NewTruck(21, 10, 0, 0),
 		NewTruck(22, 10, 0, 0),
 		NewTruck(23, 10, 0, 0),
+		NewTruck(24, 10, 0, 0),
+		NewTruck(25, 10, 0, 0),
 	}
 }
 

@@ -127,24 +127,3 @@ func resetTruckDest(e eventbus.Event) {
 	event := e.(*ResetTruckDestinationEvent)
 	gameState.UpdateTruckDestRole(event.TruckID, event.RoleID)
 }
-
-// func notifyTruckMoved(t *Truck) {
-// 	eventBus.Publish(&BroadcastEvent{t})
-// }
-
-// func notifyOrderDispatcherStart(e eventbus.Event) {
-// 	logrus.Warn("order start dispatch now")
-// 	var orderSubscriber = make(chan *Order, 1)
-// 	NewOrderDispatcher(orderSubscriber).Run()
-// 	go func() {
-// 		for {
-// 			order := <-orderSubscriber
-// 			eventBus.Publish(&NewOrderFromCustomerEvent{order: order})
-// 		}
-// 	}()
-// }
-
-// func startListenOrderDispatch() {
-// 	order := <-orderSubscriber
-// 	hub.OrderIn(order)
-// }
