@@ -8,9 +8,12 @@
     <script src="/public/assets/vue.js"></script>
 
     <style type="text/css">
-
         .field-label {
             text-align: left;
+        }
+
+        .field {
+            align-items: center;
         }
     </style>
 </head>
@@ -69,7 +72,12 @@
                             <label class="label">编号</label>
                         </div>
                         <div class="field-label is-normal">
-                            <label class="label">{{ truckInfo.truckID }}</label>
+                            <!-- <label class="label">{{ truckInfo.truckID }}</label> -->
+                            <div class="select">
+                                <select v-model="truckInfo.truckID">
+                                    <option v-for="id in truckIDs">{{id}}</option>
+                                </select>
+                            </div>
                         </div>
                     </div>
 
@@ -133,12 +141,13 @@
                     startTime: 0,
                     status: "",
                     truckInfo: {
-                        truckID: "21",
+                        truckID: 21,
                         distance: 0,
                         tMaxQuantity: 0,
                         tQuantity: 0
                     },
-                    totalProductCount: 0
+                    totalProductCount: 0,
+                    truckIDs: [21, 22, 23, 24, 25]
                 }
             }
         }
@@ -146,8 +155,6 @@
         // const timer = new Timer();
 
         var conn;
-        // var msg = document.getElementById("msg");
-        // var log = document.getElementById("log");
         var roleID = 1;
 
         function productSomeProducts() {
@@ -167,7 +174,7 @@
             let roleInfo = {
                 "type": 4,
                 "roleID": roleID,
-                "truckID": 22
+                "truckID": vm.truckInfo.truckID
             };
             conn.send(JSON.stringify(roleInfo));
             console.log("--> ");

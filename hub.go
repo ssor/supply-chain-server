@@ -51,9 +51,10 @@ func (h *Hub) BroadcastObj(obj interface{}) {
 	}
 	h.Broadcast(bs)
 }
+
 func (h *Hub) Broadcast(bs []byte) {
 	h.broadcast <- bs
-	logrus.Infof("--> %s", string(bs))
+	logrus.Debugf("--> %s", string(bs))
 }
 
 func (h *Hub) UnRegister(client *Client) {

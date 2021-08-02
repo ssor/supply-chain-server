@@ -65,7 +65,8 @@ func (c *Client) readPump(hook func([]byte)) {
 			break
 		}
 		message = bytes.TrimSpace(bytes.Replace(message, newline, space, -1))
-		logrus.Infof("client (%d) <- %s", c.id, string(message))
+		logrus.Debugf("client (%d) <- %s", c.id, string(message))
+
 		if hook != nil {
 			hook(message)
 		}
@@ -101,7 +102,7 @@ func (c *Client) writePump() {
 				return
 			}
 			w.Write(message)
-			logrus.Infof("client(%d) -> %s", c.id, string(message))
+			logrus.Debugf("client(%d) -> %s", c.id, string(message))
 
 			// Add queued chat messages to the current websocket message.
 			n := len(c.send)
