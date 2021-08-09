@@ -12,7 +12,50 @@ const (
 	InventoryUpdateMessageType         MessageType = 6
 	DetailerInventoryUpdateMessageType MessageType = 7
 	GameResetMessageType               MessageType = 8
+	TruckRealtimeStatusMessageType     MessageType = 9
+	TruckMoveNextMessageType           MessageType = 10
 )
+
+func newTruckMoveNextMessage(truck int,  dest Coord ) TruckMoveNextMessage {
+	return TruckMoveNextMessage{
+		Id:        truck,
+		To: dest,
+	}
+}
+
+func (msg TruckMoveNextMessage) WithMessageBase(base MessageBase) TruckMoveNextMessage {
+	msg.MessageBase = base
+	return msg
+}
+type TruckMoveNextMessage struct {
+	MessageBase
+	Id     int   `json:"truckID"`
+	To     Coord `json:"to"`
+}
+type TruckMoveAnimationMessage struct {
+	MessageBase
+	Id     int   `json:"truckID"`
+	Cap    int   `json:"tMaxQuantity"`
+	Loaded int   `json:"tQuantity"`
+	Current   Coord     `json:"position"`
+	Direction Direction `json:"direction"`
+	Speed     int       `json:"speed"`
+}
+
+func newTruckMoveAnimationMessage(truck int,  current Coord, d Direction, speed, cap, loaded int) TruckMoveAnimationMessage {
+	return TruckMoveAnimationMessage{
+		Id:        truck,
+		Cap:       cap,
+		Loaded:    loaded,
+		Current: current,
+		Direction: d,
+		Speed:     speed,
+	}
+}
+func (msg TruckMoveAnimationMessage) WithMessageBase(base MessageBase) TruckMoveAnimationMessage {
+	msg.MessageBase = base
+	return msg
+}
 
 func NewMessageBase(t MessageType, game string, start int64) MessageBase {
 	return MessageBase{
@@ -27,7 +70,7 @@ func NewMessageBase2(t MessageType, game string, role int, start int64) MessageB
 		Type:          t,
 		GameID:        game,
 		GameStartTime: start,
-		RoleID: role,
+		RoleID:        role,
 	}
 }
 

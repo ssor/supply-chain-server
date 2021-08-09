@@ -3,7 +3,7 @@ package main
 import "github.com/ispringteam/eventbus"
 
 var (
-	eventNameBroadcast                  = eventbus.EventID("Broadcast")
+	// eventNameBroadcast                  = eventbus.EventID("Broadcast")
 	eventNameDetailerJoin               = eventbus.EventID("detailerJoin")
 	eventNameProducerJoin               = eventbus.EventID("producerJoin")
 	eventNameLevel1DispatcherJoin       = eventbus.EventID("level1DispatcherJoin")
@@ -83,14 +83,6 @@ type ResetTruckDestinationEvent struct {
 
 func (e *ResetTruckDestinationEvent) EventID() eventbus.EventID {
 	return eventNameResetTruckDestination
-}
-
-type BroadcastEvent struct {
-	Obj interface{}
-}
-
-func (be *BroadcastEvent) EventID() eventbus.EventID {
-	return eventNameBroadcast
 }
 
 type BinaryMessageDispatchEvent struct {

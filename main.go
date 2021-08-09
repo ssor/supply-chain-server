@@ -5,21 +5,22 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
 	// "github.com/sirupsen/logrus"
 
 	"github.com/gorilla/websocket"
 	"github.com/ispringteam/eventbus"
 )
 
-var eventBus = eventbus.New()
-var gameState = NewGameState(eventBus)
-var truckMonitor *TruckMonitor = NewTruckMonitor(gameState)
-var orderDispatcher = NewOrderDispatcher(gameState)
 
 // var game = NewGame()
 // var msgBase = NewMessageBase(gameState.Id, gameState.StartTime.Unix())
 var upgrader = websocket.Upgrader{} // use default options
 var hub = newHub()
+var eventBus = eventbus.New()
+var gameState = NewGameState()
+// var truckMonitor *TruckMonitor = NewTruckMonitor(gameState, hub).Run()
+var orderDispatcher = NewOrderDispatcher(gameState)
 
 // serveWs handles websocket requests from the peer.
 func serveWs(hub *Hub, w http.ResponseWriter, r *http.Request) {
@@ -36,7 +37,6 @@ func serveWs(hub *Hub, w http.ResponseWriter, r *http.Request) {
 	go client.writePump()
 	go client.readPump(func(b []byte) {
 		binaryMessageDispatch(b)
-		// eventBus.Publish(&BinaryMessageDispatchEvent{b})
 	})
 }
 
@@ -59,17 +59,14 @@ func GinMiddleware(allowOrigin string) gin.HandlerFunc {
 }
 
 func main() {
+	logrus.SetLevel(logrus.DebugLevel)
 	go hub.run()
 	// go startListenOrderDispatch()
+	newGameEngine(gameState,hub).StartRunning()
 	orderDispatcher.Run()
-	eventBus.Subscribe(eventNameBroadcast, func(e eventbus.Event) {
-		be := e.(*BroadcastEvent)
-		hub.BroadcastObj(be.Obj)
-	})
-	// eventBus.Subscribe("BroadcastObj", hub.BroadcastObj)
-	// eventBus.Subscribe(eventNamebinaryMessageDispatch, func(event eventbus.Event) {
-	// 	be := event.(*BinaryMessageDispatchEvent)
-	// 	binaryMessageDispatch(be.Binary)
+	// eventBus.Subscribe(eventNameBroadcast, func(e eventbus.Event) {
+	// 	be := e.(*BroadcastEvent)
+	// 	hub.BroadcastObj(be.Obj)
 	// })
 	// eventBus.Subscribe(eventNameNotifyOrderDispatcherStart, notifyOrderDispatcherStart)
 	// eventBus.Subscribe(eventNameNewOrderFromCustomer, newOrderFromCustomer)
@@ -104,7 +101,7 @@ func main() {
 		gameState.Reset()
 		hub.BroadcastObj(gameState.BasicGameInfoMessage())
 	})
-	truckMonitor.Run()
+	// truckMonitor.Run()
 
 	router := gin.New()
 
@@ -124,6 +121,8 @@ func main() {
 }
 
 func resetTruckDest(e eventbus.Event) {
+	logrus.Debug("-> reset Truck Dest")
 	event := e.(*ResetTruckDestinationEvent)
+	// truckMonitor.AddMonitorItem(event.TruckID, event.RoleID)
 	gameState.UpdateTruckDestRole(event.TruckID, event.RoleID)
 }

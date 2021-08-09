@@ -33,7 +33,16 @@ func binaryMessageDispatch(bs []byte) {
 			spew.Dump(number)
 			return
 		}
-		createNewRole(int(number))
+		var deviceName string
+		data := jsonParsed.Path("device").Data()
+		if data != nil {
+			deviceName = data.(string)
+		}
+		if len(deviceName) <= 0 {
+			createNewRole(int(number))
+		} else {
+			createNewRoleWithName(deviceName)
+		}
 	case ResetTruckDestinationMessageType:
 		number, ok := jsonParsed.Path("roleID").Data().(float64)
 		if !ok {
@@ -108,6 +117,30 @@ func binaryMessageDispatch(bs []byte) {
 	// c.hub.Broadcast([]byte(jsonParsed.String()))
 }
 
+func createNewRoleWithName(name string) {
+	switch name {
+	case "admin":
+		logrus.Infof("create role for device %s", name)
+		for _, sprite := range gameState.gameMap.trucks {
+			{
+				mb := NewMessageBase(TruckRealtimeStatusMessageType, gameState.Id, gameState.StartTime.Unix())
+				t := newTruckMoveAnimationMessage(
+					sprite.id,
+					sprite.currentCoord,
+					sprite.direction,
+					animationSpeed,
+					sprite.cap,
+					sprite.loaded).WithMessageBase(mb)
+				gameState.broadcastObjList <- t
+			}
+		}
+	default:
+		logrus.Warnf("no handler for device %s", name)
+		// spew.Dump(name)
+		// spew.Dump(name == "admin")
+	}
+
+}
 func createNewRole(number int) {
 	actor := RoleIdToActor(number)
 
@@ -127,7 +160,3 @@ func createNewRole(number int) {
 		eventBus.Publish(&DetailerJoinEvent{Id: number})
 	}
 }
-
-// func newOrderFromCustomer(e eventbus.Event) {
-
-// }
