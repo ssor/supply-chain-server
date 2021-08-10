@@ -1,6 +1,7 @@
 package main
 
 import (
+	"supplychain_server/protocol"
 
 	"github.com/sirupsen/logrus"
 )
@@ -8,14 +9,14 @@ import (
 
 func NewFirstMap() *FirstMap {
 	return &FirstMap{
-		positions: Positions{},
+		positions: protocol.Positions{},
 		trucks:    TruckSprites{},
 	}
 }
 
 type FirstMap struct {
 	width, height int
-	positions     Positions
+	positions     protocol.Positions
 	trucks        TruckSprites
 }
 
@@ -23,16 +24,16 @@ func (fm *FirstMap) init() *FirstMap {
 	fm.width = 1280
 	fm.height = 720
 
-	fm.trucks = fm.trucks.add(21, 10, Coord{X: 0, Y: 183}, East)
-	fm.trucks = fm.trucks.add(22, 10, Coord{X: 0, Y: 183}, East)
-	fm.trucks = fm.trucks.add(23, 10, Coord{X: 0, Y: 183}, East)
-	fm.trucks = fm.trucks.add(24, 10, Coord{X: 0, Y: 183}, East)
-	fm.trucks = fm.trucks.add(25, 10, Coord{X: 0, Y: 183}, East)
+	fm.trucks = fm.trucks.add(21, 10, protocol.Coord{X: 0, Y: 183}, protocol.East)
+	// fm.trucks = fm.trucks.add(22, 10, Coord{X: 0, Y: 183}, East)
+	// fm.trucks = fm.trucks.add(23, 10, Coord{X: 0, Y: 183}, East)
+	// fm.trucks = fm.trucks.add(24, 10, Coord{X: 0, Y: 183}, East)
+	// fm.trucks = fm.trucks.add(25, 10, Coord{X: 0, Y: 183}, East)
 
-	fm.positions = fm.positions.add(1, 100, 103)
-	fm.positions = fm.positions.add(6, 400, 103)
-	fm.positions = fm.positions.add(11, 860, 103)
-	fm.positions = fm.positions.add(16, 1200, 103)
+	fm.positions = fm.positions.Add(1, 100, 103)
+	fm.positions = fm.positions.Add(6, 400, 103)
+	fm.positions = fm.positions.Add(11, 860, 103)
+	fm.positions = fm.positions.Add(16, 1200, 103)
 
 	// fm.run()
 	return fm
@@ -48,7 +49,7 @@ func (fm *FirstMap) updateTruckDestRole(truckID, roleID int) {
 		logrus.Warnf("truck %d not found on map", truckID)
 		return
 	}
-	p := fm.positions.find(roleID)
+	p := fm.positions.Find(roleID)
 	if !p.Maybe {
 		logrus.Warnf("position: %d not found on map", roleID)
 		return
@@ -67,6 +68,6 @@ func (fm *FirstMap) updateTruckDestRole(truckID, roleID int) {
 // 		}
 // 	}()
 // }
-func (fm *FirstMap) Find(id int) MaybePosition {
-	return fm.positions.find(id)
+func (fm *FirstMap) Find(id int) protocol.MaybePosition {
+	return fm.positions.Find(id)
 }

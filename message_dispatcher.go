@@ -1,8 +1,11 @@
 package main
 
 import (
+	"supplychain_server/protocol"
+
 	"github.com/Jeffail/gabs"
 	"github.com/davecgh/go-spew/spew"
+
 	// "github.com/ispringteam/eventbus"
 	"github.com/sirupsen/logrus"
 )
@@ -24,9 +27,9 @@ func binaryMessageDispatch(bs []byte) {
 		logrus.Warnf("message protocol error")
 		return
 	}
-	t := MessageType(messageType)
+	t := protocol.MessageType(messageType)
 	switch t {
-	case RoleJoinMessageType:
+	case protocol.RoleJoinMessageType:
 		number, ok := jsonParsed.Path("roleID").Data().(float64)
 		if !ok {
 			logrus.Warnf("message protocol error")
@@ -43,7 +46,7 @@ func binaryMessageDispatch(bs []byte) {
 		} else {
 			createNewRoleWithName(deviceName)
 		}
-	case ResetTruckDestinationMessageType:
+	case protocol.ResetTruckDestinationMessageType:
 		number, ok := jsonParsed.Path("roleID").Data().(float64)
 		if !ok {
 			logrus.Warnf("message protocol error")
@@ -60,7 +63,7 @@ func binaryMessageDispatch(bs []byte) {
 			RoleID:  int(number),
 			TruckID: int(truckNumber),
 		})
-	case InventoryUpdateMessageType:
+	case protocol.InventoryUpdateMessageType:
 		number, ok := jsonParsed.Path("roleID").Data().(float64)
 		if !ok {
 			logrus.Warnf("message protocol error for roleID")
@@ -93,7 +96,7 @@ func binaryMessageDispatch(bs []byte) {
 			truckID:   int(truckNumber),
 			load:      int(truckLoad),
 		})
-	case DetailerInventoryUpdateMessageType:
+	case protocol.DetailerInventoryUpdateMessageType:
 		number, ok := jsonParsed.Path("roleID").Data().(float64)
 		if !ok {
 			logrus.Warnf("message protocol error")
@@ -123,8 +126,8 @@ func createNewRoleWithName(name string) {
 		logrus.Infof("create role for device %s", name)
 		for _, sprite := range gameState.gameMap.trucks {
 			{
-				mb := NewMessageBase(TruckRealtimeStatusMessageType, gameState.Id, gameState.StartTime.Unix())
-				t := newTruckMoveAnimationMessage(
+				mb := protocol.NewMessageBase(protocol.TruckRealtimeStatusMessageType, gameState.Id, gameState.StartTime.Unix())
+				t := protocol.NewTruckMoveAnimationMessage(
 					sprite.id,
 					sprite.currentCoord,
 					sprite.direction,

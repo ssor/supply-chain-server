@@ -2,6 +2,7 @@ package main
 
 import (
 	"strconv"
+	"supplychain_server/protocol"
 	"time"
 
 	"github.com/sirupsen/logrus"
@@ -50,8 +51,8 @@ func (gs *GameState) init() {
 	gs.gameMap = NewFirstMap().init()
 }
 
-func (gs *GameState) BasicGameInfoMessage() MessageBase {
-	return NewMessageBase(GameResetMessageType, gs.Id, gs.StartTime.Unix())
+func (gs *GameState) BasicGameInfoMessage() protocol.MessageBase {
+	return protocol.NewMessageBase(protocol.GameResetMessageType, gs.Id, gs.StartTime.Unix())
 }
 
 func (gs *GameState) ProducerJoinMessage(id int) interface{} {
@@ -61,7 +62,7 @@ func (gs *GameState) ProducerJoinMessage(id int) interface{} {
 		return nil
 	}
 	return d.WithBase(
-		NewMessageBase(RoleJoinResponseMessageType, gs.Id, gs.StartTime.Unix()))
+		protocol.NewMessageBase(protocol.RoleJoinResponseMessageType, gs.Id, gs.StartTime.Unix()))
 
 }
 func (gs *GameState) Level2DispatcherJoinMessage(id int) interface{} {
@@ -70,7 +71,7 @@ func (gs *GameState) Level2DispatcherJoinMessage(id int) interface{} {
 		return nil
 	}
 	return d.WithBase(
-		NewMessageBase(RoleJoinResponseMessageType, gs.Id, gs.StartTime.Unix()))
+		protocol.NewMessageBase(protocol.RoleJoinResponseMessageType, gs.Id, gs.StartTime.Unix()))
 }
 func (gs *GameState) Level1DispatcherJoinMessage(id int) interface{} {
 	d := gs.level1Dispatchers.Find(id)
@@ -78,7 +79,7 @@ func (gs *GameState) Level1DispatcherJoinMessage(id int) interface{} {
 		return nil
 	}
 	return d.WithBase(
-		NewMessageBase(RoleJoinResponseMessageType, gs.Id, gs.StartTime.Unix()))
+		protocol.NewMessageBase(protocol.RoleJoinResponseMessageType, gs.Id, gs.StartTime.Unix()))
 }
 func (gs *GameState) DetailerJoinMessage(id int) interface{} {
 	d := gs.detailers.Find(id)
@@ -86,7 +87,7 @@ func (gs *GameState) DetailerJoinMessage(id int) interface{} {
 		return nil
 	}
 	return d.WithBase(
-		NewMessageBase(RoleJoinResponseMessageType, gs.Id, gs.StartTime.Unix()))
+		protocol.NewMessageBase(protocol.RoleJoinResponseMessageType, gs.Id, gs.StartTime.Unix()))
 }
 
 func (gs *GameState) AddProducer(id int) {
@@ -166,7 +167,7 @@ func (gs *GameState) CheckOrder() {
 	}
 	// oe := e.(*NewOrderFromCustomerEvent)
 	headDetailer.AddOrder(headOrder)
-	base := NewMessageBase2(OrderDispatch2DetailerMessageType, gs.Id, headDetailer.id, gs.StartTime.Unix())
+	base := protocol.NewMessageBase2(protocol.OrderDispatch2DetailerMessageType, gs.Id, headDetailer.id, gs.StartTime.Unix())
 	msg := headOrder.WithMessageBase(base)
 	gs.broadcastObjList <- msg
 }

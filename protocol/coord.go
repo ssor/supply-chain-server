@@ -1,8 +1,8 @@
-package main
+package protocol
 
 import "fmt"
 
-func newCoord(x, y int) Coord {
+func NewCoord(x, y int) Coord {
 	return Coord{X: x, Y: y}
 }
 

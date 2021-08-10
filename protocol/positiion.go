@@ -1,4 +1,4 @@
-package main
+package protocol
 
 import "fmt"
 
@@ -12,7 +12,7 @@ import "fmt"
 // 	return p
 // }
 
-func newPosition(id, x, y int) Position {
+func NewPosition(id, x, y int) Position {
 	p := Position{
 		Id: id,
 	}
@@ -20,7 +20,7 @@ func newPosition(id, x, y int) Position {
 	p.Y = y
 	return p
 }
-func newEmptyPosition(x, y int) Position {
+func NewEmptyPosition(x, y int) Position {
 	p := Position{
 		Id: 0,
 	}
@@ -57,7 +57,7 @@ type MaybePosition struct {
 	Position
 }
 
-func (positions Positions) find(id int) MaybePosition {
+func (positions Positions) Find(id int) MaybePosition {
 	for _, c := range positions {
 		if c.Id == id {
 			return MaybePosition{Maybe: true, Position: c}
@@ -66,11 +66,11 @@ func (positions Positions) find(id int) MaybePosition {
 	return MaybePosition{}
 }
 
-func (positions Positions) add(id, x, y int) Positions {
-	return append(positions, newPosition(id, x, y))
+func (positions Positions) Add(id, x, y int) Positions {
+	return append(positions, NewPosition(id, x, y))
 }
 
-func newPositionLine() *PositionLine {
+func NewPositionLine() *PositionLine {
 	return &PositionLine{
 		SN: 0,
 		// NextIndex: -1,

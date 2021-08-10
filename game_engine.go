@@ -1,6 +1,9 @@
 package main
 
-import "time"
+import (
+	"supplychain_server/protocol"
+	"time"
+)
 
 type InfoPublisher interface {
 	BroadcastObj(interface{})
@@ -45,7 +48,7 @@ func (ge *GameEngine) truckMove() {
 				continue
 			}
 			{
-				mb := NewMessageBase2(TruckInfoNotifyMessageType, ge.gs.Id, p.Id, ge.gs.StartTime.Unix())
+				mb := protocol.NewMessageBase2(protocol.TruckInfoNotifyMessageType, ge.gs.Id, p.Id, ge.gs.StartTime.Unix())
 				t := Truck{
 					MessageBase:  mb,
 					Id:           sprite.id,
@@ -56,8 +59,8 @@ func (ge *GameEngine) truckMove() {
 				ge.publisher.BroadcastObj(t)
 			}
 			{
-				mb := NewMessageBase(TruckMoveNextMessageType, ge.gs.Id, ge.gs.StartTime.Unix())
-				t := newTruckMoveNextMessage(
+				mb := protocol.NewMessageBase(protocol.TruckMoveNextMessageType, ge.gs.Id, ge.gs.StartTime.Unix())
+				t := protocol.NewTruckMoveNextMessage(
 					sprite.id,
 					sprite.destPosition.Coord).WithMessageBase(mb)
 				ge.publisher.BroadcastObj(t)

@@ -1,4 +1,4 @@
-package main
+package protocol
 
 type MessageType int
 
@@ -16,7 +16,7 @@ const (
 	TruckMoveNextMessageType           MessageType = 10
 )
 
-func newTruckMoveNextMessage(truck int,  dest Coord ) TruckMoveNextMessage {
+func NewTruckMoveNextMessage(truck int,  dest Coord ) TruckMoveNextMessage {
 	return TruckMoveNextMessage{
 		Id:        truck,
 		To: dest,
@@ -42,7 +42,7 @@ type TruckMoveAnimationMessage struct {
 	Speed     int       `json:"speed"`
 }
 
-func newTruckMoveAnimationMessage(truck int,  current Coord, d Direction, speed, cap, loaded int) TruckMoveAnimationMessage {
+func NewTruckMoveAnimationMessage(truck int,  current Coord, d Direction, speed, cap, loaded int) TruckMoveAnimationMessage {
 	return TruckMoveAnimationMessage{
 		Id:        truck,
 		Cap:       cap,

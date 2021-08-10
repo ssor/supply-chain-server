@@ -1,5 +1,7 @@
 package main
 
+import "supplychain_server/protocol"
+
 func NewProducer(id int) *Producer {
 	return &Producer{
 		id: id,
@@ -8,10 +10,10 @@ func NewProducer(id int) *Producer {
 
 type Producer struct {
 	id int `json:"-"`
-	MessageBase
+	protocol.MessageBase
 }
 
-func (d *Producer) WithBase(base MessageBase) Producer {
+func (d *Producer) WithBase(base protocol.MessageBase) Producer {
 	// t := d.RoleID
 	p := Producer{
 		id:          d.id,

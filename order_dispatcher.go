@@ -1,6 +1,7 @@
 package main
 
 import (
+	"supplychain_server/protocol"
 	"time"
 
 	"github.com/sirupsen/logrus"
@@ -8,14 +9,14 @@ import (
 
 type Order struct {
 	Count int `json:"purchaseCnt"`
-	MessageBase
+	protocol.MessageBase
 }
 
 func NewOrder() *Order {
 	return &Order{Count: 1}
 }
 
-func (o *Order) WithMessageBase(base MessageBase) Order {
+func (o *Order) WithMessageBase(base protocol.MessageBase) Order {
 	c := Order{
 		Count:       o.Count,
 		MessageBase: base,

@@ -1,6 +1,10 @@
 package main
 
-import "github.com/sirupsen/logrus"
+import (
+	"supplychain_server/protocol"
+
+	"github.com/sirupsen/logrus"
+)
 
 func NewDispatcher(id int) *Dispatcher {
 	return &Dispatcher{
@@ -14,10 +18,10 @@ type Dispatcher struct {
 	id               int `json:"-"`
 	MaxInventory     int `json:"maxInventory"`
 	CurrentInventory int `json:"currentInventory"`
-	MessageBase
+	protocol.MessageBase
 }
 
-func (d *Dispatcher) WithBase(base MessageBase) Dispatcher {
+func (d *Dispatcher) WithBase(base protocol.MessageBase) Dispatcher {
 	c := Dispatcher{
 		id:               d.id,
 		MaxInventory:     d.MaxInventory,
