@@ -5,10 +5,6 @@
     <title>供应链监控</title>
     <link rel="stylesheet" href="/public/assets/bulma.min.css">
     <!-- <script src="/public/assets/vue.js"></script> -->
-    <!-- <script src="/public/assets/phaser-arcade-physics.js"></script> -->
-    <script src="/public/assets/phaser.js"></script>
-
-
     <style type="text/css">
 
 
@@ -22,73 +18,7 @@
     </div> -->
     <!-- <script type="module" src="/public/src/admin-main.js"> </script> -->
     <script type="module">
-        import { game, gameScene } from './src/admin-main.js'
-        import { keyPoints } from './src/MapInfo.js'
-        window.onload = function () {
-            let conn;
-            if (window["WebSocket"]) {
-                conn = new WebSocket("ws://" + document.location.host + "/ws");
-                conn.onclose = function (evt) {
-                    // vm.status = "连接已断开";
-                    console.log("连接已断开");
-                };
-                conn.onopen = function (evt) {
-                    // vm.status = "已连接到服务器";
-                    console.log("已连接到服务器");
-                    setTimeout(function () {
-                        let roleInfo = {
-                            "type": 1,
-                            "roleID": 0,
-                            "device": "admin"
-                        };
-                        conn.send(JSON.stringify(roleInfo));
-                        // console.log("--> ");
-                        // console.table(roleInfo);
-                    }, 1000)
-
-                };
-                conn.onmessage = function (evt) {
-                    var messages = evt.data.split('\n');
-                    for (var i = 0; i < messages.length; i++) {
-                        console.log("<<<<<<<<<<<<<--- ");
-                        let obj = JSON.parse(messages[i]);
-                        console.table(obj);
-                        switch (obj.type) {
-                            case 1:
-                                break;
-                            case 2:
-                                break;
-                            case 3:
-                                break;
-                            case 5:
-
-                                break;
-                            case 8:
-                                break;
-                            case 9:
-                                gameScene.truck.setPosition(obj.position);
-                                gameScene.truck.setSpeed(obj.speed);
-                                break;
-                            case 10:
-                                gameScene.truck.addDest(obj.to);
-                                break;
-                            default:
-                                console.error(`No Such Message Type ${obj.type}`);
-                                break;
-                        }
-                    }
-                };
-            } else {
-                console.error("Your browser does not support WebSockets.");
-            }
-        };
-
-        setTimeout(() => {
-            // gameScene.truck.addDest(keyPoints);
-            // gameScene.truck.addDest(keyPoints.reverse());
-            gameScene.producer.updateProductText(10);
-
-        }, 1000)
+     
     </script>
 
 </body>

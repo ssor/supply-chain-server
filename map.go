@@ -6,7 +6,6 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-
 func NewFirstMap() *FirstMap {
 	return &FirstMap{
 		positions: protocol.Positions{},
@@ -24,16 +23,16 @@ func (fm *FirstMap) init() *FirstMap {
 	fm.width = 1280
 	fm.height = 720
 
-	fm.trucks = fm.trucks.add(21, 10, protocol.Coord{X: 0, Y: 183}, protocol.East)
+	fm.trucks = fm.trucks.add(21, 10, protocol.Coord{X: 0, Y: 150}, protocol.East)
 	// fm.trucks = fm.trucks.add(22, 10, Coord{X: 0, Y: 183}, East)
 	// fm.trucks = fm.trucks.add(23, 10, Coord{X: 0, Y: 183}, East)
 	// fm.trucks = fm.trucks.add(24, 10, Coord{X: 0, Y: 183}, East)
 	// fm.trucks = fm.trucks.add(25, 10, Coord{X: 0, Y: 183}, East)
 
-	fm.positions = fm.positions.Add(1, 100, 103)
-	fm.positions = fm.positions.Add(6, 400, 103)
-	fm.positions = fm.positions.Add(11, 860, 103)
-	fm.positions = fm.positions.Add(16, 1200, 103)
+	fm.positions = fm.positions.Add(1, 100, 150)
+	fm.positions = fm.positions.Add(6, 400, 150)
+	fm.positions = fm.positions.Add(11, 860, 150)
+	fm.positions = fm.positions.Add(16, 1200, 150)
 
 	// fm.run()
 	return fm

@@ -6,19 +6,22 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
+
 	// "github.com/sirupsen/logrus"
 
 	"github.com/gorilla/websocket"
 	"github.com/ispringteam/eventbus"
 )
 
-
 // var game = NewGame()
 // var msgBase = NewMessageBase(gameState.Id, gameState.StartTime.Unix())
-var upgrader = websocket.Upgrader{} // use default options
+var upgrader = websocket.Upgrader{
+	CheckOrigin: func(r *http.Request) bool { return true },
+} // use default options
 var hub = newHub()
 var eventBus = eventbus.New()
 var gameState = NewGameState()
+
 // var truckMonitor *TruckMonitor = NewTruckMonitor(gameState, hub).Run()
 var orderDispatcher = NewOrderDispatcher(gameState)
 
@@ -62,7 +65,7 @@ func main() {
 	logrus.SetLevel(logrus.DebugLevel)
 	go hub.run()
 	// go startListenOrderDispatch()
-	newGameEngine(gameState,hub).StartRunning()
+	newGameEngine(gameState, hub).StartRunning()
 	orderDispatcher.Run()
 	// eventBus.Subscribe(eventNameBroadcast, func(e eventbus.Event) {
 	// 	be := e.(*BroadcastEvent)
